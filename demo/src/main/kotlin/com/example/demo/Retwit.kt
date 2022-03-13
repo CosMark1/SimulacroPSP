@@ -10,7 +10,8 @@ data class Retwit (var id :Int, var texto:String) {
     @Id
     @GeneratedValue
     var idd = 0
-    var retwits = 
+    var retwits = 0
+
     var time = System.currentTimeMillis()
     override fun toString(): String {
         val gson= Gson()
