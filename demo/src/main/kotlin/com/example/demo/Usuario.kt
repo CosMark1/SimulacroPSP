@@ -19,16 +19,12 @@ data class Usuario (var nombre: String, var password:String){
 
     fun generarToken(): String {
         var palabra = ""
-        repeat(8) {
+        repeat(3) {
             val letra = 'a'..'z'
             val letras = letra.random()
             palabra += letras
         }
-        repeat(3) {
-            val numero = 0..9
-            val numeros = numero.random()
-            palabra += numero
-        }
+
         return palabra
     }
 }

@@ -5,12 +5,8 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
-@Entity
-data class Retwit (var id :Int, var texto:String) {
-    @Id
-    @GeneratedValue
-    var idd = 0
-    var retwits = 0
+
+data class Retwit (var token :String, var id:Int) {
 
     var time = System.currentTimeMillis()
     override fun toString(): String {

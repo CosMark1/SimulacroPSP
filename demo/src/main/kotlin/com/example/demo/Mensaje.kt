@@ -4,8 +4,9 @@ import com.google.gson.Gson
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
+
 @Entity
-data class Mensaje (var nombre :String, var texto:String) {
+data class Mensaje (var token :String, var texto:String) {
     @Id
     @GeneratedValue
     var idd = 0

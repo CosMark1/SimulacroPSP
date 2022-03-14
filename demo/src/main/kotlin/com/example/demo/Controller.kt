@@ -10,8 +10,8 @@ import javax.crypto.BadPaddingException
 @RestController
 class Controller(
     val usuarioRepository: UsuarioRepository,
-    val mensajeRepository: MensajeRepository,
-    val retwitRepository: RetwitRepository
+    val mensajeRepository: MensajeRepository
+
 ) {
 
 
@@ -30,53 +30,91 @@ class Controller(
                     return it.token
 
                 } else {
-                    return "Error"
+                    return Error(1,"Contraseña incorrecta")
                 }
             }
         }
         usuarioRepository.save(usuario)
-        return usuario
+        return usuario.token
     }
-    // curl --request POST  --header "Content-type:application/json" --data "{\"nombre\":\"Ditto\",\"texto\":\"Ditto\"}" localhost:8083/crearMensaje
+
+    @GetMapping("monstrarMensajes/{token}")
+    fun monstrarMensajes(@PathVariable token : String): Any {
+        usuarioRepository.findAll().forEach{ user ->
+            if(user.token == token){
+                mensajeRepository.findAll().forEach {
+                    Lista.lista.add(it)
+                }
+                return Lista
+            }
+        }
+        return "Error en el token"
+    }
+    @GetMapping("descargarMensajes")
+    fun descargarMensajes(): Any {
+        mensajeRepository.findAll().forEach {
+            Lista.lista.add(it)
+        }
+        return Lista
+
+    }
+    // curl --request POST  --header "Content-type:application/json" --data "{\"token\":\"cod\",\"texto\":\"Ditto\"}" localhost:8083/crearMensaje
     @PostMapping("crearMensaje")
     fun crearMensaje(@RequestBody mensaje: Mensaje): Any {
 
         usuarioRepository.findAll().forEach {
-            if (it.nombre == mensaje.nombre) {
+            if (it.token == mensaje.token) {
                 mensajeRepository.save(mensaje)
                 return "Listo"
             }
         }
         return "Error"
     }
-    @GetMapping("descargarMensajes")
-    fun descargarMensajes(): Any {
 
-        mensajeRepository.findAll().forEach {
-            Lista.lista.add(it)
-        }
-        return Lista
-    }
+
+
     @GetMapping("retwittear/{mensajeId}")
-    fun retwittear(@PathVariable mensajeId : Int): Any {
+    fun retwittear(@PathVariable mensajeId: Int): Any {
         val mensajeRetwitteado = mensajeRepository.findById(mensajeId)
-        if(mensajeRetwitteado.isPresent){
+        if (mensajeRetwitteado.isPresent) {
             mensajeRetwitteado.get().retwits++
             return mensajeRetwitteado
         }
         return "Mensaje no encontrado"
     }
 
-    @GetMapping("Retwittear")
-    fun retwittear1(@RequestBody retwit: Retwit):Any{
+    //curl --request GET  --header "Content-type:application/json" --data "{\"token\":\"Ditto\",\"texto\":\"Ditto\"}" localhost:8083/retwittear
+    @GetMapping("retwittear")
+    fun retwittear1(@RequestBody mensaje: Mensaje): Any {
 
-        mensajeRepository.findAll().forEach{
-            retwitRepository.save(it)
-        }
+        mensajeRepository.findAll().forEach {
 
-        return mensajeRepository.getById(retwit.id)
+                if (it.texto == mensaje.texto) {
+                    mensaje.idd = it.idd
+                    val mensajeRetwitteado = mensajeRepository.findById(mensaje.idd)
+                    if (mensajeRetwitteado.isPresent) {
+                        mensajeRetwitteado.get().retwits++
+                        mensajeRepository.save(it)
+                        return mensajeRetwitteado
+                    }
+                    return "Mensaje no encontrado"
+                }
+            }
+
+        return mensajeRepository.getById(mensaje.idd)
     }
+    //curl --request GET  --header "Content-type:application/json" --data "{\"token\":\"rsl\",\"id\": 3}" localhost:8083/retwittearCastellano
+    @GetMapping("retwittearCastellano")
+    fun retwittearCastellano(@RequestBody retwit: Retwit): Any {
 
+        if(mensajeRepository.findById(retwit.id).isPresent){
+            mensajeRepository.getById(retwit.id).retwits++
+            val texto = mensajeRepository.getById(retwit.id).texto
+            mensajeRepository.save(Mensaje(retwit.token,texto))
+            return mensajeRepository.getById(retwit.id)
+        }
+        return "Error"
+    }
 
 
 }
