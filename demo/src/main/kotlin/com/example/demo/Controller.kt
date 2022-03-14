@@ -40,6 +40,7 @@ class Controller(
 
     @GetMapping("monstrarMensajes/{token}")
     fun monstrarMensajes(@PathVariable token : String): Any {
+        vaciarlista()
         usuarioRepository.findAll().forEach{ user ->
             if(user.token == token){
                 mensajeRepository.findAll().forEach {
@@ -52,13 +53,14 @@ class Controller(
     }
     @GetMapping("descargarMensajes")
     fun descargarMensajes(): Any {
+        vaciarlista()
         mensajeRepository.findAll().forEach {
             Lista.lista.add(it)
         }
         return Lista
 
     }
-    // curl --request POST  --header "Content-type:application/json" --data "{\"token\":\"cod\",\"texto\":\"Ditto\"}" localhost:8083/crearMensaje
+    // curl --request POST  --header "Content-type:application/json" --data "{\"token\":\"moz\",\"texto\":\"Ditto\"}" localhost:8083/crearMensaje
     @PostMapping("crearMensaje")
     fun crearMensaje(@RequestBody mensaje: Mensaje): Any {
 
@@ -103,7 +105,7 @@ class Controller(
 
         return mensajeRepository.getById(mensaje.idd)
     }
-    //curl --request GET  --header "Content-type:application/json" --data "{\"token\":\"rsl\",\"id\": 3}" localhost:8083/retwittearCastellano
+    //curl --request GET  --header "Content-type:application/json" --data "{\"token\":\"xzo\",\"id\": 3}" localhost:8083/retwittearCastellano
     @GetMapping("retwittearCastellano")
     fun retwittearCastellano(@RequestBody retwit: Retwit): Any {
 
@@ -113,8 +115,45 @@ class Controller(
             mensajeRepository.save(Mensaje(retwit.token,texto))
             return mensajeRepository.getById(retwit.id)
         }
-        return "Error"
+        return Error(2,"No has encontrado el twit")
     }
 
+    //curl -v localhost:8083/borrarMensajes/moz
+    @GetMapping("borrarMensajes/{tokenUsuario}")
+    fun borrarMensajes (@PathVariable tokenUsuario: String): Any{
+
+        usuarioRepository.findAll().forEach{
+            if(it.token == tokenUsuario){
+                usuarioRepository.delete(it)
+                mensajeRepository.findAll().forEach{ mensajes ->
+                    if(it.token == tokenUsuario){
+                        mensajeRepository.delete(mensajes)
+                        return "Success"
+                    }
+                }
+            }
+        }
+        return Error(3,"Usuario NOT FOUND")
+    }
+
+    @PostMapping("borrarMensajes")
+    fun borrarMensajes1 (@RequestBody usuario: Usuario): Any{
+
+        usuarioRepository.findAll().forEach{
+            if(it.token == usuario.token){
+                usuarioRepository.delete(it)
+                mensajeRepository.findAll().forEach{ mensajes ->
+                    if(it.token == usuario.token){
+                        mensajeRepository.delete(mensajes)
+                        return "Success"
+                    }
+                }
+            }
+        }
+        return Error(3,"Usuario NOT FOUND")
+    }
+    fun vaciarlista(){
+        Lista.lista.clear()
+    }
 
 }
